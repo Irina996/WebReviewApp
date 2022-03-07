@@ -15,7 +15,7 @@ namespace WebRecomendationControlApp.Controllers
 
         public IActionResult Index()
         {
-            return View();
+            return RedirectToAction("List", "Review");
         }
 
         public IActionResult Privacy()

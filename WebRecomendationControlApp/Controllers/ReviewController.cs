@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,7 @@ namespace WebRecomendationControlApp.Controllers
             return RedirectToAction("List");
 		}
 
+        [Authorize]
         public IActionResult Create()
         {
             SelectList groups = new SelectList(_context.reviewGroups, "Id", "Name");
@@ -114,11 +116,10 @@ namespace WebRecomendationControlApp.Controllers
 
         public IActionResult Details(int id)
         {
-
             ViewBag.AllowEdit = false;
             var review = _context.Reviews.Where(r => r.Id == id).Include(x => x.Group)
                 .Include(x => x.Tags).Include(x => x.Creator).FirstOrDefault();
-            if (review.Creator == this.User.Identity)
+            if (review.Creator.UserName == this.User.Identity.Name)
             {
                 ViewBag.AllowEdit = true;
             }
