@@ -83,7 +83,8 @@ namespace WebRecomendationControlApp.Controllers
                     Description = model.ReviewDescription,
                     Group = group,
                     Tags = tagList,
-                    Creator = user
+                    Creator = user,
+                    Rating = model.ReviewRating
                 };
                 _context.Reviews.Add(review);
                 _context.SaveChanges();
