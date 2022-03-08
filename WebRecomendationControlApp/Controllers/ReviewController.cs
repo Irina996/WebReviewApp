@@ -14,7 +14,8 @@ namespace WebRecomendationControlApp.Controllers
         UserManager<IdentityUser> _userManager;
         ApplicationDbContext _context;
 
-        public ReviewController(UserManager<IdentityUser> userManager, ApplicationDbContext context)
+        public ReviewController(UserManager<IdentityUser> userManager, 
+            ApplicationDbContext context)
         {
             _userManager = userManager;
             _context = context;
@@ -27,7 +28,8 @@ namespace WebRecomendationControlApp.Controllers
 
         public IActionResult List()
         {
-            var reviews = _context.Reviews.Include(x => x.Group).Include(x => x.Tags).Include(x => x.Creator);
+            var reviews = _context.Reviews.Include(x => x.Group)
+                .Include(x => x.Tags).Include(x => x.Creator);
             return View(reviews);
         }
 
@@ -76,7 +78,6 @@ namespace WebRecomendationControlApp.Controllers
                     if (tag != null)
                         tagList.Add(new ReviewTag { Tag = tag });
                 }
-                /*var tagList = getTagList(model.ReviewTags);*/
                 Review review = new Review
                 {
                     Title = model.ReviewTitle,

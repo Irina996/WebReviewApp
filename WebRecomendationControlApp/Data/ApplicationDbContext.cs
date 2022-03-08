@@ -7,10 +7,10 @@ namespace WebRecomendationControlApp.Data
     public class ApplicationDbContext : IdentityDbContext
     {
         public DbSet<Review> Reviews { get; set; }
-
         public DbSet<ReviewGroup> reviewGroups { get; set; }
-
         public DbSet<ReviewTag> reviewTags { get; set; }
+        public DbSet<ReviewComment> ReviewComments { get; set; }
+
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)
         {

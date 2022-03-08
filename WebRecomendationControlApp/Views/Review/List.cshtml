@@ -44,7 +44,9 @@
                 @Html.DisplayFor(modelItem => item.Creator.UserName)
             </td>
             <td>
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> 
+                <a class="text-decoration-none text-reset" asp-action="Details" asp-route-id="@item.Id">
+                    <i class="fa fa-info-circle" aria-hidden="true"></i>Details
+                </a> 
             </td>
         </tr>
 }

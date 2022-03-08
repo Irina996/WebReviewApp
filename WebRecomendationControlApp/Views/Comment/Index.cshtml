@@ -1,0 +1,48 @@
+﻿@model IEnumerable<WebRecomendationControlApp.Models.ReviewComment>
+
+@{
+	ViewData["Title"] = "Index";
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h1>Comments</h1>
+
+<table class="table">
+	<thead>
+		<tr>
+			<th>
+				@Html.DisplayNameFor(model => model.Commentator)
+			</th>
+			<th>
+				@Html.DisplayNameFor(model => model.Text)
+			</th>
+		</tr>
+	</thead>
+	<tbody>
+		@foreach (var item in Model)
+		{
+			<tr>
+				<td>
+					@Html.DisplayFor(modelItem => item.Commentator.UserName)
+				</td>
+				<td>
+					@Html.DisplayFor(modelItem => item.Text)
+				</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+<div class="fixed-bottom container bg-white ">
+	<form asp-action="Create">
+		<div class="form-inline">
+		<div class="d-flex justify-content-center pb-3 pt-1">
+			<input type="hidden" name="ReviewId" value=@ViewBag.ReviewId />
+			<textarea class="form-control border border-dark" rows="1" name="CommentText"></textarea>
+			<button type="submit" class="btn btn-light btn-circle">
+				<i class="fa fa-paper-plane"></i>
+			</button>
+		</div>
+		</div>
+	</form>
+</div>
