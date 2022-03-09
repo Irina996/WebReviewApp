@@ -29,7 +29,9 @@ namespace WebRecomendationControlApp.Controllers
         public IActionResult List()
         {
             var reviews = _context.Reviews.Include(x => x.Group)
-                .Include(x => x.Tags).Include(x => x.Creator);
+                .Include(x => x.Tags)
+                .Include(x => x.Creator)
+                .OrderByDescending(x => x.Id);
             return View(reviews);
         }
 
@@ -37,8 +39,11 @@ namespace WebRecomendationControlApp.Controllers
         {
             SelectList groups = new SelectList(_context.reviewGroups, "Id", "Name");
             ViewBag.ReviewGroups = groups;
-            var review = _context.Reviews.Where(r => r.Id == id).Include(x => x.Group)
-                .Include(x => x.Tags).Include(x => x.Creator).FirstOrDefault();
+            var review = _context.Reviews.Where(r => r.Id == id)
+                .Include(x => x.Group)
+                .Include(x => x.Tags)
+                .Include(x => x.Creator)
+                .FirstOrDefault();
             return View(review);
         }
 

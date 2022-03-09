@@ -17,7 +17,7 @@
                 @Html.DisplayNameFor(model => model.Title)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Description)
+                @Html.DisplayNameFor(model => model.Group)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.Rating)
@@ -35,7 +35,7 @@
                 @Html.DisplayFor(modelItem => item.Title)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Description)
+                @Html.DisplayFor(modelItem => item.Group.Name)
             </td>
             <td>
                 @Html.DisplayFor(modelItem => item.Rating)
@@ -44,7 +44,7 @@
                 @Html.DisplayFor(modelItem => item.Creator.UserName)
             </td>
             <td>
-                <a class="text-decoration-none text-reset" asp-action="Details" asp-route-id="@item.Id">
+                <a class="text-decoration-none" asp-action="Details" asp-route-id="@item.Id">
                     <i class="fa fa-info-circle" aria-hidden="true"></i>Details
                 </a> 
             </td>

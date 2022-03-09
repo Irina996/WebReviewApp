@@ -24,7 +24,7 @@ namespace WebRecomendationControlApp.Controllers
         {
             ViewBag.ReviewId = id;
             var comments = _context.ReviewComments.Include(c => c.Commentator)
-                .Include(c => c.CommentedReview).Where(c => c.CommentedReview.Id == id);
+                .Include(c => c.CommentedReview).Where(c => c.CommentedReview.Id == id).OrderByDescending(c => c.Id);
             return View(comments);
         }
 

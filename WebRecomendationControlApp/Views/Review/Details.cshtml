@@ -8,7 +8,20 @@
 <h1>Details</h1>
 
 <div>
-	<h4>Review</h4>
+	<div class="row">
+		<div class="justify-content-xl-start">
+			<label class="col h4">Review</label>
+			@if (ViewBag.AllowEdit)
+			{
+				<a class="col text-decoration-none" asp-action="Edit" asp-route-id="@Model?.Id">
+					<i class="fa fa-pencil" aria-hidden="true"></i>
+				</a>
+				<a class="col text-decoration-none" asp-Action="Delete" asp-route-id="@Model?.Id">
+					<i class="fa fa-trash" aria-hidden="true"></i>
+				</a>
+			}
+		</div>
+	</div>
 	<hr />
 	<dl class="row">
 		<dt class="col-sm-2">
@@ -42,12 +55,6 @@
 		<dd class="col-sm-10">
 			@Html.DisplayFor(model => model.Group.Name)
 		</dd>
-		@*<dt class = "col-sm-2">
-			@Html.DisplayNameFor(model => model.ImageUrl)
-			</dt>
-			<dd class = "col-sm-10">
-			@Html.DisplayFor(model => model.ImageUrl)
-			</dd>*@
 		<dt class="col-sm-2">
 			@Html.DisplayNameFor(model => model.Rating)
 		</dt>
@@ -62,21 +69,9 @@
 		</dd>
 	</dl>
 </div>
-@*<form id="listComments" asp-controller="Comment" asp-action="Index">
-	<input type="hidden" asp-for="Id" />
-</form>*@
 <div class="row">
 	<div class="justify-content-xl-start">
-		@if (ViewBag.AllowEdit)
-		{
-			<a class="col text-decoration-none text-reset" asp-action="Edit" asp-route-id="@Model?.Id">
-				<i class="fa fa-pencil" aria-hidden="true"></i>
-			</a>
-			<a class="col text-decoration-none text-reset" asp-Action="Delete" asp-route-id="@Model?.Id">
-				<i class="fa fa-trash" aria-hidden="true"></i>
-			</a>
-		}
-		<a class="col text-decoration-none text-reset" asp-controller="Comment" asp-action="Index" asp-route-id="@Model?.Id">
+		<a class="col text-decoration-none" asp-controller="Comment" asp-action="Index" asp-route-id="@Model?.Id">
 			<i class="fa fa-comment" aria-hidden="true"></i>
 		</a>
 	</div>
