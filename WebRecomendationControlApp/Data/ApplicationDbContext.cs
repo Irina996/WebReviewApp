@@ -11,6 +11,7 @@ namespace WebRecomendationControlApp.Data
         public DbSet<ReviewTag> reviewTags { get; set; }
         public DbSet<ReviewComment> ReviewComments { get; set; }
         public DbSet<ReviewLike> ReviewLikes { get; set; }
+        public DbSet<ReviewRate> ReviewRates { get; set; }
 
         public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options)
             : base(options)

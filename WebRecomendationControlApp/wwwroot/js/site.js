@@ -90,3 +90,23 @@ function ChangeLikeStatus(id, uId) {
     }
 	var reseting = $.post("/Like/ResetLike", { reviewId: id, userId: uId });
 }
+
+function ChangeStarStatus(starId, reviewId, userId) {
+	var id = parseInt(starId.slice(4));
+	var i = 1;
+	for (; i <= id; i++) {
+		var star = document.getElementById("star" + i);
+		if (star.classList.contains("far")) {
+			star.classList.remove("far");
+			star.classList.add("fa");
+		}
+	}
+	for (; i <= 5; i++) {
+		var star = document.getElementById("star" + i);
+		if (star.classList.contains("fa")) {
+			star.classList.remove("fa");
+			star.classList.add("far");
+		}
+	}
+	var reseting = $.post("/Rate/ResetRate", { starCount: id, reviewId: reviewId, userId: userId });
+}

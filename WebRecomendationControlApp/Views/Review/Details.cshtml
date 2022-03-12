@@ -76,14 +76,28 @@
 		</a>
 		@if (ViewBag.Liked)
 		{
-			<button id="likeBtn" class="col btn btn-white btn-circle" onclick="ChangeLikeStatus('@Model?.Id', '@Model?.Creator.Id')">
+			<button class="col btn btn-white btn-circle" onclick="ChangeLikeStatus('@Model?.Id', '@ViewBag.UserId')">
 				<i id="like" class="fa fa-heart" aria-hidden="true" style='color: blue'></i>
 			</button>
 		}
 		else
 		{
-			<button id="likeBtn" class="col btn btn-white btn-circle" onclick="ChangeLikeStatus('@Model?.Id', '@Model?.Creator.Id')">
+			<button class="col btn btn-white btn-circle" onclick="ChangeLikeStatus('@Model?.Id', '@ViewBag.UserId')">
 				<i id="like" class="far fa-heart" aria-hidden="true" style='color: blue'></i>
+			</button>
+		}
+		@for (int i = 1; i <= ViewBag.StarCount; i++)
+		{
+			string starId = "star" + i;
+			<button class="col btn btn-white btn-circle mx-0 px-0" onclick="ChangeStarStatus('@starId', '@Model?.Id', '@ViewBag.UserId')">
+				<i id="@starId" class="fa fa-star" aria-hidden="true" style='color: blue'></i>
+			</button>
+		}
+		@for (int i = ViewBag.StarCount + 1; i <= 5; i++)
+		{
+			string starId = "star" + i;
+			<button class="col btn btn-white btn-circle mx-0 px-0" onclick="ChangeStarStatus('@starId', '@Model?.Id', '@ViewBag.UserId')">
+				<i id="@starId" class="far fa-star" aria-hidden="true" style='color: blue'></i>
 			</button>
 		}
 	</div>

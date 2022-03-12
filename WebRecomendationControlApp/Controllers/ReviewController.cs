@@ -167,7 +167,8 @@ namespace WebRecomendationControlApp.Controllers
             return RedirectToAction("List");
         }
 
-        public IActionResult Details(int id)
+        [Authorize]
+        public async Task<IActionResult> Details(int id)
         {
             var review = _context.Reviews.Where(r => r.Id == id)
                 .Include(x => x.Group)
@@ -179,14 +180,21 @@ namespace WebRecomendationControlApp.Controllers
             {
                 ViewBag.AllowEdit = true;
             }
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            ViewBag.UserId = user.Id;
             var like = _context.ReviewLikes
-                .Where(l => l.User == review.Creator)
+                .Where(l => l.User == user && l.LikedReviewId == review.Id)
                 .FirstOrDefault();
             ViewBag.Liked = false;
             if (like != null)
             {
                 ViewBag.Liked = true;
             }
+            ViewBag.StarCount = _context.ReviewRates
+                .Where(r => r.RatedReviewId == id && r.UserId == user.Id)
+                .FirstOrDefault()?.Rate;
+            if (ViewBag.StarCount == null)
+                ViewBag.StarCount = 0;
             return View(review);
         }
 
