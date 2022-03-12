@@ -2,7 +2,6 @@
 // for details on configuring this project to bundle and minify static web assets.
 
 $(document).ready(function () {
-    // подписать кнопки пейджера на событие click
     $("#send-comment-button").click(function (e) {
         e.preventDefault();
         var reviewId = $("#ReviewId").val();
@@ -77,4 +76,17 @@ function DeleteEmptyTags() {
 			i = i + 1;
 		}
 	}
+}
+
+function ChangeLikeStatus(id, uId) {
+	var like = document.getElementById("like");
+	if (like.classList.contains("fa")) {
+		like.classList.remove("fa");
+		like.classList.add("far");
+	}
+	else {
+		like.classList.remove("far");
+		like.classList.add("fa");
+    }
+	var reseting = $.post("/Like/ResetLike", { reviewId: id, userId: uId });
 }

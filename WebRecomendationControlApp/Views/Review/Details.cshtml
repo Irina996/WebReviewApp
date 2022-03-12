@@ -74,10 +74,18 @@
 		<a class="col text-decoration-none" asp-controller="Comment" asp-action="Index" asp-route-id="@Model?.Id">
 			<i class="fa fa-comment" aria-hidden="true"></i>
 		</a>
-		@*<a class="start-0" href="#" rating="2" title="vote 2">vote 2</a>
-		<a class="star outline" href="#" rating="1" title="vote 1"> vote 1</a>
-		<span class="fa fa-star"></span>
-		<button onclick=""><i class="fa fa-heart-o" aria-hidden="true"></i></button>*@
+		@if (ViewBag.Liked)
+		{
+			<button id="likeBtn" class="col btn btn-white btn-circle" onclick="ChangeLikeStatus('@Model?.Id', '@Model?.Creator.Id')">
+				<i id="like" class="fa fa-heart" aria-hidden="true" style='color: blue'></i>
+			</button>
+		}
+		else
+		{
+			<button id="likeBtn" class="col btn btn-white btn-circle" onclick="ChangeLikeStatus('@Model?.Id', '@Model?.Creator.Id')">
+				<i id="like" class="far fa-heart" aria-hidden="true" style='color: blue'></i>
+			</button>
+		}
 	</div>
 	<a href="javascript:history.back()">Back</a>
 </div>

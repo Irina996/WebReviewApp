@@ -14,7 +14,7 @@ namespace WebRecomendationControlApp.Controllers
         UserManager<IdentityUser> _userManager;
         ApplicationDbContext _context;
 
-        public ReviewController(UserManager<IdentityUser> userManager, 
+        public ReviewController(UserManager<IdentityUser> userManager,
             ApplicationDbContext context)
         {
             _userManager = userManager;
@@ -49,16 +49,22 @@ namespace WebRecomendationControlApp.Controllers
             {
                 tagList.Add(tag.Tag);
             }
-            ReviewViewModel model = new ReviewViewModel { Id = review.Id, 
-                ReviewCreatorName = review.Creator.UserName, ReviewDescription = review.Description, 
-                ReviewTitle = review.Title, ReviewTags = tagList, ReviewGroupId = review.GroupId, 
-                ReviewRating = review.Rating };
+            ReviewViewModel model = new ReviewViewModel
+            {
+                Id = review.Id,
+                ReviewCreatorName = review.Creator.UserName,
+                ReviewDescription = review.Description,
+                ReviewTitle = review.Title,
+                ReviewTags = tagList,
+                ReviewGroupId = review.GroupId,
+                ReviewRating = review.Rating
+            };
             return View(model);
         }
 
         [HttpPost]
         public async Task<IActionResult> Edit(ReviewViewModel model)
-		{
+        {
             DeleteTags(model.Id);
             var user = await _userManager.GetUserAsync(HttpContext.User);
             Review existingReview = _context.Reviews.Where(r => r.Id == model.Id)
@@ -84,8 +90,8 @@ namespace WebRecomendationControlApp.Controllers
                 }
             }
             _context.SaveChanges();
-            return RedirectToAction("Details", new {review.Id});
-		}
+            return RedirectToAction("Details", new { review.Id });
+        }
 
         private void DeleteTags(int id)
         {
@@ -140,16 +146,22 @@ namespace WebRecomendationControlApp.Controllers
 
         public IActionResult Delete(int id)
         {
-            var review = _context.Reviews.Where(r => r.Id == id).Include(x => x.Group)
-                .Include(x => x.Tags).Include(x => x.Creator).FirstOrDefault();
+            var review = _context.Reviews.Where(r => r.Id == id)
+                .Include(x => x.Group)
+                .Include(x => x.Tags)
+                .Include(x => x.Creator)
+                .FirstOrDefault();
             return View(review);
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteReview(int id)
         {
-            var review = _context.Reviews.Where(r => r.Id == id).Include(x => x.Group)
-                .Include(x => x.Tags).Include(x => x.Creator).FirstOrDefault();
+            var review = _context.Reviews.Where(r => r.Id == id)
+                .Include(x => x.Group)
+                .Include(x => x.Tags)
+                .Include(x => x.Creator)
+                .FirstOrDefault();
             _context.Reviews.Remove(review);
             _context.SaveChanges();
             return RedirectToAction("List");
@@ -157,12 +169,23 @@ namespace WebRecomendationControlApp.Controllers
 
         public IActionResult Details(int id)
         {
+            var review = _context.Reviews.Where(r => r.Id == id)
+                .Include(x => x.Group)
+                .Include(x => x.Tags)
+                .Include(x => x.Creator)
+                .FirstOrDefault();
             ViewBag.AllowEdit = false;
-            var review = _context.Reviews.Where(r => r.Id == id).Include(x => x.Group)
-                .Include(x => x.Tags).Include(x => x.Creator).FirstOrDefault();
             if (review.Creator.UserName == this.User.Identity.Name)
             {
                 ViewBag.AllowEdit = true;
+            }
+            var like = _context.ReviewLikes
+                .Where(l => l.User == review.Creator)
+                .FirstOrDefault();
+            ViewBag.Liked = false;
+            if (like != null)
+            {
+                ViewBag.Liked = true;
             }
             return View(review);
         }
@@ -170,8 +193,10 @@ namespace WebRecomendationControlApp.Controllers
         public IActionResult UserReviews()
         {
             string user = this.User.Identity.Name;
-            var reviews = _context.Reviews.Include(x => x.Group).Include(x => x.Tags)
-                .Include(x => x.Creator).Where(x => x.Creator.UserName == user);
+            var reviews = _context.Reviews.Where(x => x.Creator.UserName == user)
+                .Include(x => x.Group)
+                .Include(x => x.Tags)
+                .Include(x => x.Creator);
             return View(reviews);
         }
     }
