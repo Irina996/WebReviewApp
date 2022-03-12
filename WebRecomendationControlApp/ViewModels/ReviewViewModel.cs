@@ -5,6 +5,8 @@ namespace WebRecomendationControlApp.ViewModels
 {
     public class ReviewViewModel
     {
+        public int Id { get; set; }
+
         [Required]
         [Display(Name = "Title")]
         public string ReviewTitle { get; set; }
@@ -18,15 +20,16 @@ namespace WebRecomendationControlApp.ViewModels
         public int ReviewGroupId { get; set; }
 
         [Required]
-        [Display(Name = "Tags(put each tag in different field)")]
+        [Display(Name = "Tags")]
         public List<string> ReviewTags { get; set; }
 
         /*[Display(Name = "Images")]
         public List<string>? ImageUrl { get; set; }*/
 
         [Required]
-        [Display(Name = "Rating(0-5)")]
+        [Display(Name = "Rating")]
         public int ReviewRating { get; set; }
 
+        public string ReviewCreatorName { get; set; }
     }
 }

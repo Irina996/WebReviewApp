@@ -44,16 +44,58 @@ namespace WebRecomendationControlApp.Controllers
                 .Include(x => x.Tags)
                 .Include(x => x.Creator)
                 .FirstOrDefault();
-            return View(review);
+            List<string> tagList = new List<string>();
+            foreach (var tag in review.Tags)
+            {
+                tagList.Add(tag.Tag);
+            }
+            ReviewViewModel model = new ReviewViewModel { Id = review.Id, 
+                ReviewCreatorName = review.Creator.UserName, ReviewDescription = review.Description, 
+                ReviewTitle = review.Title, ReviewTags = tagList, ReviewGroupId = review.GroupId, 
+                ReviewRating = review.Rating };
+            return View(model);
         }
 
         [HttpPost]
-        public async Task<IActionResult> Edit(Review review)
+        public async Task<IActionResult> Edit(ReviewViewModel model)
 		{
-            _context.Entry(review).State = EntityState.Modified;
+            DeleteTags(model.Id);
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            Review existingReview = _context.Reviews.Where(r => r.Id == model.Id)
+                .Include(x => x.Group)
+                .Include(x => x.Tags)
+                .Include(x => x.Creator)
+                .First();
+            var review = getReviewFromModel(model, user);
+            _context.Entry(existingReview).CurrentValues.SetValues(review);
+            foreach (var tag in review.Tags)
+            {
+                tag.ReviewId = review.Id;
+                var existingTag = existingReview.Tags
+                    .FirstOrDefault(t => t.Tag == tag.Tag);
+                if (existingTag == null)
+                {
+                    existingReview.Tags.Add(tag);
+                }
+                else
+                {
+                    tag.Id = existingTag.Id;
+                    _context.Entry(existingTag).CurrentValues.SetValues(tag);
+                }
+            }
             _context.SaveChanges();
-            return RedirectToAction("List");
+            return RedirectToAction("Details", new {review.Id});
 		}
+
+        private void DeleteTags(int id)
+        {
+            var tags = _context.reviewTags.Where(t => t.ReviewId == id);
+            foreach (var tag in tags)
+            {
+                _context.reviewTags.Remove(tag);
+            }
+            _context.SaveChanges();
+        }
 
         [Authorize]
         public IActionResult Create()
@@ -66,42 +108,34 @@ namespace WebRecomendationControlApp.Controllers
         [HttpPost]
         public async Task<IActionResult> Create(ReviewViewModel model)
         {
-            if (model.ReviewTitle == null)
-                ModelState.AddModelError("ReviewTitle", "Tittle is required");
-            if (model.ReviewDescription == null)
-                ModelState.AddModelError("ReviewDescription", "Description is required");
-            if (model.ReviewTags[0] == null)
-                ModelState.AddModelError("ReviewTags", "Input tag");
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            Review review = getReviewFromModel(model, user);
+            _context.Reviews.Add(review);
+            _context.SaveChanges();
+            return RedirectToAction("List", "Review");
+        }
 
-            if (ModelState.IsValid)
+        private Review getReviewFromModel(ReviewViewModel model, IdentityUser user)
+        {
+            ReviewGroup group = _context.reviewGroups.Find(model.ReviewGroupId);
+            List<ReviewTag> tagList = new List<ReviewTag>();
+            foreach (var tag in model.ReviewTags)
             {
-                var user = await _userManager.GetUserAsync(HttpContext.User);
-                ReviewGroup group = _context.reviewGroups.Find(model.ReviewGroupId);
-                List<ReviewTag> tagList = new List<ReviewTag>();
-                foreach (var tag in model.ReviewTags)
-                {
-                    if (tag != null)
-                        tagList.Add(new ReviewTag { Tag = tag });
-                }
-                Review review = new Review
-                {
-                    Title = model.ReviewTitle,
-                    Description = model.ReviewDescription,
-                    Group = group,
-                    Tags = tagList,
-                    Creator = user,
-                    Rating = model.ReviewRating
-                };
-                _context.Reviews.Add(review);
-                _context.SaveChanges();
-                return RedirectToAction("List", "Review");
+                if (tag != null)
+                    tagList.Add(new ReviewTag { Tag = tag });
             }
-            else
+            Review review = new Review
             {
-                SelectList groups = new SelectList(_context.reviewGroups, "Id", "Name");
-                ViewBag.ReviewGroups = groups;
-                return View();
-            }
+                Id = model.Id,
+                Title = model.ReviewTitle,
+                Description = model.ReviewDescription,
+                GroupId = model.ReviewGroupId,
+                Group = group,
+                Tags = tagList,
+                Creator = user,
+                Rating = model.ReviewRating
+            };
+            return review;
         }
 
         public IActionResult Delete(int id)

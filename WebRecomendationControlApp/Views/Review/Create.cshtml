@@ -1,129 +1,14 @@
 ﻿@model WebRecomendationControlApp.ViewModels.ReviewViewModel
 
-<script>
-	function  onChangeAdd()
-	{
-		let container = document.getElementById("tagsContainer");
-		let fields = container.getElementsByTagName("input");
-
-		let i = 0;
-		var empty = 0;
-		while (fields[i] != undefined)
-		{
-			if (fields[i].value == "")
-			{
-				empty = empty + 1;
-			}
-			i = i + 1;
-		}
-		if (empty > 1)
-		{
-			DeleteEmptyTags();
-			empty = 0;
-		}
-		if (empty == 0)
-		{
-			let fieldCount = container.getElementsByTagName("input").length;
-			let nextFieldId = fieldCount + 1;
-
-			let field = document.createElement("input");
-				field.setAttribute("id", "Tag[" + nextFieldId + "]");
-				field.setAttribute("name", "ReviewTags");
-				field.setAttribute("type", "text");
-				field.setAttribute("onchange", "onChangeAdd()");
-				field.setAttribute("autocomplete", "on");
-
-			container.appendChild(field);
-		}
-	}
-
-	function DeleteEmptyTags() {
-		let container = document.getElementById("tagsContainer");
-		let fields = container.getElementsByTagName("input");
-		let fieldCount = container.getElementsByTagName("input").length;
-		var i = 0;
-		while (i <= fieldCount && fields[i] != undefined)
-		{
-			if (fields[i].value == "")
-			{
-				let k = i + 1;
-				while (fields[k] != undefined && fields[k].value == "")
-				{
-					k = k + 1;
-				}
-				let j = i;
-				while ( fields[k] != undefined)
-				{
-					fields[j].value = fields[k].value;
-					fields[k].value = "";
-					j = j + 1;
-					k = k + 1;
-				}
-			}
-			i = i + 1;
-		}
-		i = 0;
-		while (fields[i] != undefined)
-		{
-			if (fields[i].value == "")
-			{
-				let removedEl = container.removeChild(fields[i])
-			}
-			else
-			{
-				i = i + 1;
-			}
-		}
-	}
-
-	function AddNewField() {
-		let container = document.getElementById("tagsContainer");
-		let fieldCount = container.getElementsByTagName("input").length;
-		let nextFieldId = fieldCount + 1;
-
-		let field = document.createElement("input");
-			field.setAttribute("id", "Tag[" + nextFieldId + "]");
-			field.setAttribute("name", "ReviewTags");
-			field.setAttribute("type", "text");
-			field.setAttribute("onchange", "onChangeAdd()");
-
-		container.appendChild(field);
-	}
-</script>
-
 <h2>Create review</h2>
 <div class="row">
 	<div class="col-md-4">
 		<form method="post" asp-controller="Review" asp-action="Create">
 			<div asp-validation-summary="ModelOnly" class="text-danger"></div>
-			<div>
-				<label asp-for="ReviewTitle"></label><br />
-				<input type="text" asp-for="ReviewTitle" />
-				<span asp-validation-for="ReviewTitle" class="text-danger"></span>
-			</div>
-			<div id="tagsContainer">
-				<label asp-for="ReviewTags"></label><br />
-				<input id="Tag[1]" name="ReviewTags" type="text" asp-for="ReviewTags" autocomplete="on" onchange="onChangeAdd()" />
-				<span asp-validation-for="ReviewTags" class="text-danger"></span>
-			</div>
-			<div>
-				<label asp-for="ReviewGroupId"></label><br />
-				@Html.DropDownListFor(model => model.ReviewGroupId, ViewBag.ReviewGroups as SelectList)
-				<span asp-validation-for="ReviewGroupId" class="text-danger"></span>
-			</div>
-			<div>
-				<label asp-for="ReviewRating"></label><br />
-				<input type="number" min="0" max="5" asp-for="ReviewRating" />
-				<span asp-validation-for="ReviewRating" class="text-danger"></span>
-			</div>
-			<div>
-				<label asp-for="ReviewDescription"></label><br />
-				<textarea rows="10" cols="45" asp-for="ReviewDescription"></textarea>
-				<span asp-validation-for="ReviewDescription" class="text-danger"></span>
-			</div>
+			<partial name="_EditReview" model="@Model" />
 			<div>
 				<br />
-				<input type="submit" value="Create" />
+				<input type="submit" value="Create" class="btn btn-primary" />
 			</div>
 		</form>
 	</div>
