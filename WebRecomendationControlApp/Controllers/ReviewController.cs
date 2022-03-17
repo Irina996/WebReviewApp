@@ -162,9 +162,29 @@ namespace WebRecomendationControlApp.Controllers
                 .Include(x => x.Tags)
                 .Include(x => x.Creator)
                 .FirstOrDefault();
+            deleteLikes(review.Id);
+            deleteRates(review.Id);
             _context.Reviews.Remove(review);
             _context.SaveChanges();
             return RedirectToAction("List");
+        }
+
+        public void deleteLikes(int reviewId)
+        {
+            var likes = _context.ReviewLikes
+                .Where(l => l.LikedReviewId == reviewId);
+            foreach (var like in likes)
+                _context.ReviewLikes.Remove(like);
+            _context.SaveChanges();
+        }
+
+        public void deleteRates(int reviewId)
+        {
+            var rates = _context.ReviewRates
+                .Where(r => r.RatedReviewId == reviewId);
+            foreach (var rate in rates)
+                _context.ReviewRates.Remove(rate);
+            _context.SaveChanges();
         }
 
         [Authorize]
