@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Text;
 using WebRecomendationControlApp.Data;
 using WebRecomendationControlApp.Models;
 using WebRecomendationControlApp.ViewModels;
@@ -13,12 +14,16 @@ namespace WebRecomendationControlApp.Controllers
     {
         UserManager<IdentityUser> _userManager;
         ApplicationDbContext _context;
+        private readonly IConfiguration _config;
+        private readonly IWebHostEnvironment _hostEnvironment;
 
         public ReviewController(UserManager<IdentityUser> userManager,
-            ApplicationDbContext context)
+            ApplicationDbContext context, IConfiguration config, IWebHostEnvironment hostEnvironment)
         {
             _userManager = userManager;
             _context = context;
+            _config = config;
+            _hostEnvironment = hostEnvironment;
         }
 
         public IActionResult Index()
@@ -35,20 +40,29 @@ namespace WebRecomendationControlApp.Controllers
             return View(reviews);
         }
 
-        public IActionResult Edit(int id)
+        private Review? GetReview(int id)
         {
-            SelectList groups = new SelectList(_context.reviewGroups, "Id", "Name");
-            ViewBag.ReviewGroups = groups;
-            var review = _context.Reviews.Where(r => r.Id == id)
+            return _context.Reviews.Where(r => r.Id == id)
                 .Include(x => x.Group)
                 .Include(x => x.Tags)
                 .Include(x => x.Creator)
                 .FirstOrDefault();
+        }
+
+        private List<string> getTagList(List<ReviewTag> reviewTags)
+        {
             List<string> tagList = new List<string>();
-            foreach (var tag in review.Tags)
+            foreach (var tag in reviewTags)
             {
                 tagList.Add(tag.Tag);
             }
+            return tagList;
+        }
+        public IActionResult Edit(int id)
+        {
+            ViewBag.ReviewGroups = new SelectList(_context.reviewGroups, "Id", "Name"); ;
+            var review = GetReview(id);
+            List<string> tagList = getTagList(review.Tags);
             ReviewViewModel model = new ReviewViewModel
             {
                 Id = review.Id,
@@ -62,26 +76,16 @@ namespace WebRecomendationControlApp.Controllers
             return View(model);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Edit(ReviewViewModel model)
+        private void ChangeReviewTags(int reviewId, List<ReviewTag> reviewTags, List<ReviewTag> existingTags)
         {
-            DeleteTags(model.Id);
-            var user = await _userManager.GetUserAsync(HttpContext.User);
-            Review existingReview = _context.Reviews.Where(r => r.Id == model.Id)
-                .Include(x => x.Group)
-                .Include(x => x.Tags)
-                .Include(x => x.Creator)
-                .First();
-            var review = getReviewFromModel(model, user);
-            _context.Entry(existingReview).CurrentValues.SetValues(review);
-            foreach (var tag in review.Tags)
+            foreach (var tag in reviewTags)
             {
-                tag.ReviewId = review.Id;
-                var existingTag = existingReview.Tags
-                    .FirstOrDefault(t => t.Tag == tag.Tag);
-                if (existingTag == null)
+                tag.ReviewId = reviewId;
+                var existingTag = existingTags
+                    .FirstOrDefault(t => t.Tag == tag.Tag && t.ReviewId == reviewId);
+                if (existingTag == null )
                 {
-                    existingReview.Tags.Add(tag);
+                    existingTags.Add(tag);
                 }
                 else
                 {
@@ -89,18 +93,33 @@ namespace WebRecomendationControlApp.Controllers
                     _context.Entry(existingTag).CurrentValues.SetValues(tag);
                 }
             }
-            _context.SaveChanges();
-            return RedirectToAction("Details", new { review.Id });
+            for (int i = 0; i < existingTags.Count; i++)
+            {
+                var existingTag = reviewTags
+                    .FirstOrDefault(t => t.Tag == existingTags[i].Tag && t.ReviewId == reviewId);
+                if (existingTag == null)
+                {
+                    existingTags.Remove(existingTags[i]);
+                    i--;
+                }
+            }
         }
 
-        private void DeleteTags(int id)
+        [HttpPost]
+        public async Task<IActionResult> Edit(ReviewViewModel model)
         {
-            var tags = _context.reviewTags.Where(t => t.ReviewId == id);
-            foreach (var tag in tags)
+            var user = await _userManager.GetUserAsync(HttpContext.User);
+            Review existingReview = GetReview(model.Id);
+            var review = getReviewFromModel(model, user);
+            review.ImageUrl = user.Id + "/" + model.Id;
+            _context.Entry(existingReview).CurrentValues.SetValues(review);
+            ChangeReviewTags(review.Id, review.Tags, existingReview.Tags);
+            if (model.ImageFiles != null)
             {
-                _context.reviewTags.Remove(tag);
+                await SaveImages(model.ImageFiles, review.Creator.Id, review.Id);
             }
             _context.SaveChanges();
+            return RedirectToAction("Details", new { review.Id });
         }
 
         [Authorize]
@@ -118,7 +137,35 @@ namespace WebRecomendationControlApp.Controllers
             Review review = getReviewFromModel(model, user);
             _context.Reviews.Add(review);
             _context.SaveChanges();
+            if (model.ImageFiles != null)
+            {
+                await SaveImages(model.ImageFiles, review.Creator.Id, review.Id);
+                review.ImageUrl = review.Creator.Id + "/" + review.Id;
+                _context.SaveChanges();
+            }
             return RedirectToAction("List", "Review");
+        }
+
+        private async Task SaveImages(IFormFile[] images, string userId, int reviewId)
+        {
+            string imagesPath = Path.Combine(_hostEnvironment.WebRootPath, "images");
+            imagesPath = Path.Combine(
+                    imagesPath,
+                    userId,
+                    reviewId.ToString()
+                );
+            Directory.CreateDirectory(imagesPath);
+            foreach (var image in images)
+            {
+                if (image.Length > 0)
+                {
+                    string filePath = Path.Combine(imagesPath, image.FileName);
+                    using (Stream fileStream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await image.CopyToAsync(fileStream);
+                    }
+                }
+            }
         }
 
         private Review getReviewFromModel(ReviewViewModel model, IdentityUser user)
@@ -146,30 +193,38 @@ namespace WebRecomendationControlApp.Controllers
 
         public IActionResult Delete(int id)
         {
-            var review = _context.Reviews.Where(r => r.Id == id)
-                .Include(x => x.Group)
-                .Include(x => x.Tags)
-                .Include(x => x.Creator)
-                .FirstOrDefault();
+            var review = GetReview(id);
+            ViewBag.Images = GetImages(review.ImageUrl);
             return View(review);
         }
 
         [HttpPost]
         public async Task<IActionResult> DeleteReview(int id)
         {
-            var review = _context.Reviews.Where(r => r.Id == id)
-                .Include(x => x.Group)
-                .Include(x => x.Tags)
-                .Include(x => x.Creator)
-                .FirstOrDefault();
+            var review = GetReview(id);
             deleteLikes(review.Id);
             deleteRates(review.Id);
+            deleteImages(review.ImageUrl);
             _context.Reviews.Remove(review);
             _context.SaveChanges();
             return RedirectToAction("List");
         }
 
-        public void deleteLikes(int reviewId)
+        private void deleteImages(string UrlPath)
+        {
+            if (UrlPath != null)
+            {
+                string imagesPath = Path.Combine(_hostEnvironment.WebRootPath, "images");
+                imagesPath = Path.Combine(imagesPath, UrlPath);
+                if (Directory.Exists(imagesPath))
+                {
+                    var dir = new DirectoryInfo(imagesPath);
+                    dir.Delete(true);
+                }
+            }
+        }
+
+        private void deleteLikes(int reviewId)
         {
             var likes = _context.ReviewLikes
                 .Where(l => l.LikedReviewId == reviewId);
@@ -178,7 +233,7 @@ namespace WebRecomendationControlApp.Controllers
             _context.SaveChanges();
         }
 
-        public void deleteRates(int reviewId)
+        private void deleteRates(int reviewId)
         {
             var rates = _context.ReviewRates
                 .Where(r => r.RatedReviewId == reviewId);
@@ -190,32 +245,60 @@ namespace WebRecomendationControlApp.Controllers
         [Authorize]
         public async Task<IActionResult> Details(int id)
         {
-            var review = _context.Reviews.Where(r => r.Id == id)
-                .Include(x => x.Group)
-                .Include(x => x.Tags)
-                .Include(x => x.Creator)
-                .FirstOrDefault();
-            ViewBag.AllowEdit = false;
-            if (review.Creator.UserName == this.User.Identity.Name)
-            {
-                ViewBag.AllowEdit = true;
-            }
+            var review = GetReview(id);
             var user = await _userManager.GetUserAsync(HttpContext.User);
+            ViewBag.AllowEdit = IsAllowEdit(user, review.Creator.Id);
             ViewBag.UserId = user.Id;
+            ViewBag.Liked = IsLiked(user, review.Id);
+            ViewBag.StarCount = GetStarCount(user, review.Id);
+            ViewBag.Images = GetImages(review.ImageUrl);
+            return View(review);
+        }
+
+        private FileInfo[] GetImages(string imageUrl)
+        {
+            if (imageUrl == null)
+                return null;
+            string imagesPath = Path.Combine(_hostEnvironment.WebRootPath, "images");
+            imagesPath = Path.Combine(imagesPath, imageUrl);
+            if (Directory.Exists(imagesPath))
+            {
+                DirectoryInfo directoryInfo = new DirectoryInfo(imagesPath);
+                FileInfo[] imageFiles = directoryInfo.GetFiles();
+                return imageFiles;
+            }
+            return null;
+        }
+
+        private bool IsAllowEdit(IdentityUser user, string creatorId)
+        {
+            if (creatorId == user.Id)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private bool IsLiked(IdentityUser user, int reviewId)
+        {
             var like = _context.ReviewLikes
-                .Where(l => l.User == user && l.LikedReviewId == review.Id)
+                .Where(l => l.User == user && l.LikedReviewId == reviewId)
                 .FirstOrDefault();
-            ViewBag.Liked = false;
             if (like != null)
             {
-                ViewBag.Liked = true;
+                return true;
             }
-            ViewBag.StarCount = _context.ReviewRates
-                .Where(r => r.RatedReviewId == id && r.UserId == user.Id)
+            return false;
+        }
+
+        private int GetStarCount(IdentityUser user, int reviewId)
+        {
+            var starCount = _context.ReviewRates
+                .Where(r => r.RatedReviewId == reviewId && r.UserId == user.Id)
                 .FirstOrDefault()?.Rate;
-            if (ViewBag.StarCount == null)
-                ViewBag.StarCount = 0;
-            return View(review);
+            if (starCount == null)
+                starCount = 0;
+            return (int)starCount;
         }
 
         public IActionResult UserReviews()

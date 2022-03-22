@@ -23,8 +23,8 @@ namespace WebRecomendationControlApp.ViewModels
         [Display(Name = "Tags")]
         public List<string> ReviewTags { get; set; }
 
-        /*[Display(Name = "Images")]
-        public List<string>? ImageUrl { get; set; }*/
+        [Display(Name = "Image File")]
+        public IFormFile[]? ImageFiles { get; set; }
 
         [Required]
         [Display(Name = "Rating")]

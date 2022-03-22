@@ -40,3 +40,15 @@
 	<textarea rows="10" cols="45" asp-for="ReviewDescription" class="form-control"></textarea>
 	<span asp-validation-for="ReviewDescription" class="text-danger"></span>
 </div>
+<div class="form-group">
+	<label asp-for="ImageFiles" class="control-label"></label>
+	<input asp-for="ImageFiles" type="file" accept="image/*" class="form-control" multiple/>
+	<span asp-validation-for="ImageFiles" class="text-danger"></span>
+</div>
+
+@*<div class="file-upload-wrapper">
+   <input type="file" id="input-image" class="file-upload" data-height="500" name="imageName" onchange="updateImageDisplay()" />
+</div>
+<div id="preview">
+	<p>No files currently selected for upload</p>
+</div>*@
