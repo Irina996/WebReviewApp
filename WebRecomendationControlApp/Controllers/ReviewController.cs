@@ -14,15 +14,13 @@ namespace WebRecomendationControlApp.Controllers
     {
         UserManager<IdentityUser> _userManager;
         ApplicationDbContext _context;
-        private readonly IConfiguration _config;
         private readonly IWebHostEnvironment _hostEnvironment;
 
         public ReviewController(UserManager<IdentityUser> userManager,
-            ApplicationDbContext context, IConfiguration config, IWebHostEnvironment hostEnvironment)
+            ApplicationDbContext context, IWebHostEnvironment hostEnvironment)
         {
             _userManager = userManager;
             _context = context;
-            _config = config;
             _hostEnvironment = hostEnvironment;
         }
 

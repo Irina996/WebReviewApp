@@ -11,6 +11,9 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="AspNet.Security.OAuth.Discord" Version="6.0.4" />
+    <PackageReference Include="AspNet.Security.OAuth.LinkedIn" Version="6.0.4" />
+    <PackageReference Include="AspNet.Security.OAuth.MailRu" Version="6.0.4" />
     <PackageReference Include="AspNet.Security.OAuth.Vkontakte" Version="6.0.4" />
     <PackageReference Include="jQuery.filedrop" Version="1.0.1" />
     <PackageReference Include="Microsoft.AspNet.WebHelpers" Version="3.2.7" />
@@ -25,6 +28,21 @@
 
   <ItemGroup>
     <Folder Include="wwwroot\images\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
