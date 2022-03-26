@@ -131,17 +131,23 @@ namespace WebRecomendationControlApp.Controllers
         }
 
         [Authorize]
-        public IActionResult Create()
+        public async Task<IActionResult> Create(string userId)
         {
+            if (userId == null)
+            {
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                userId = user.Id;
+            }
+            ViewBag.userId = userId;
             SelectList groups = new SelectList(_context.reviewGroups, "Id", "Name");
             ViewBag.ReviewGroups = groups;
             return View();
         }
 
         [HttpPost]
-        public async Task<IActionResult> Create(ReviewViewModel model)
+        public async Task<IActionResult> Create(ReviewViewModel model, string userId)
         {
-            var user = await _userManager.GetUserAsync(HttpContext.User);
+            var user = _context.Users.Where(u => u.Id == userId).First();
             Review review = getReviewFromModel(model, user);
             _context.Reviews.Add(review);
             _context.SaveChanges();
@@ -323,13 +329,23 @@ namespace WebRecomendationControlApp.Controllers
             return (int)starCount;
         }
 
-        public IActionResult UserReviews()
+        private IEnumerable<Review> GetUserReviews(string creatorId)
         {
-            string user = this.User.Identity.Name;
-            var reviews = _context.Reviews.Where(x => x.Creator.UserName == user)
+            var reviews = _context.Reviews.Where(x => x.Creator.Id == creatorId)
                 .Include(x => x.Group)
-                .Include(x => x.Tags)
-                .Include(x => x.Creator);
+                .OrderByDescending(x => x.Id);
+            return reviews;
+        }
+
+        public async Task<IActionResult> UserPage(string userId)
+        {
+            if (userId == null)
+            {
+                var user = await _userManager.GetUserAsync(HttpContext.User);
+                userId = user.Id;
+            }
+            ViewBag.userId = userId;
+            var reviews = GetUserReviews(userId);
             return View(reviews);
         }
 
