@@ -47,7 +47,7 @@
 	@if (ViewBag.Images != null)
 	{
 		<dt class="col-sm-2">
-			Images
+			@SharedLocalizer["Images"]
 		</dt>
 		<dd class="col-sm-10">
 
@@ -55,7 +55,6 @@
 			{
 				<img src="~/images/@Model.ImageUrl/@file.Name" />
 			}
-
 		</dd>
 	}
 </dl>

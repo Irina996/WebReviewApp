@@ -5,9 +5,9 @@
 	Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<h1>Edit</h1>
+<h1>@Localizer["Edit"]</h1>
 
-<h4>Review</h4>
+<h4>@SharedLocalizer["Review"]</h4>
 <hr />
 <div class="row">
 	<div class="col-md-4">
@@ -16,7 +16,7 @@
 			<partial name="_EditReview" model="@Model" />
 			<div class="form-group">
 				<br />
-				<input type="submit" value="Save" class="btn btn-primary" />
+				<input type="submit" value="@Localizer["Save"]" class="btn btn-primary" />
 			</div>
 		</form>
 	</div>

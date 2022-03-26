@@ -1,6 +1,6 @@
 ﻿@model WebRecomendationControlApp.ViewModels.ReviewViewModel
 
-<h2>Create review</h2>
+<h2>@Localizer["CreateReview"]</h2>
 <div class="row">
 	<div class="col-md-4">
 		<form method="post" asp-controller="Review" asp-action="Create" enctype="multipart/form-data">
@@ -8,7 +8,7 @@
 			<partial name="_EditReview" model="@Model" />
 			<div>
 				<br />
-				<input type="submit" value="Create" class="btn btn-primary" />
+				<input type="submit" value="@Localizer["Create"]" class="btn btn-primary" />
 			</div>
 		</form>
 	</div>

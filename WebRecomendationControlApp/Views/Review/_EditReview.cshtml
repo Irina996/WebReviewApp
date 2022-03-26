@@ -7,7 +7,7 @@
 	<span asp-validation-for="ReviewTitle" class="text-danger"></span>
 </div>
 <div id="tagsContainer">
-	<label asp-for="ReviewTags" class="control-label">Tags (put each tag in different field)</label><br />
+	<label asp-for="ReviewTags" class="control-label">@SharedLocalizer["TagsInputLabel"]</label><br />
 	@{
 		int i = 1;
 		string stringId;

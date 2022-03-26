@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using WebRecomendationControlApp.Models;
 
 namespace WebRecomendationControlApp.ViewModels
 {
@@ -7,26 +6,26 @@ namespace WebRecomendationControlApp.ViewModels
     {
         public int Id { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "RequiredErrorMessage")]
         [Display(Name = "Title")]
         public string ReviewTitle { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "RequiredErrorMessage")]
         [Display(Name = "Description")]
         public string ReviewDescription { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "RequiredErrorMessage")]
         [Display(Name = "Group")]
         public int ReviewGroupId { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "RequiredErrorMessage")]
         [Display(Name = "Tags")]
         public List<string> ReviewTags { get; set; }
 
         [Display(Name = "Image File")]
         public IFormFile[]? ImageFiles { get; set; }
 
-        [Required]
+        [Required(ErrorMessage = "RequiredErrorMessage")]
         [Display(Name = "Rating")]
         public int ReviewRating { get; set; }
 
