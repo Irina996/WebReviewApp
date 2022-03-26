@@ -29,12 +29,22 @@ namespace WebRecomendationControlApp.Controllers
             return View();
         }
 
-        public IActionResult List()
+        public IActionResult List(List<int>? ids = null, bool empty = false)
         {
-            var reviews = _context.Reviews.Include(x => x.Group)
-                .Include(x => x.Tags)
-                .Include(x => x.Creator)
-                .OrderByDescending(x => x.Id);
+            if (!empty && ids.Count == 0)
+            {
+                var revs = _context.Reviews.Include(x => x.Group)
+                    .Include(x => x.Tags)
+                    .Include(x => x.Creator)
+                    .OrderByDescending(x => x.Id).ToList();
+                return View(revs);
+            }
+            List<Review> reviews = new List<Review>();
+            foreach (var id in ids)
+            {
+                var rev = GetReview(id);
+                reviews.Add(rev);
+            }
             return View(reviews);
         }
 
@@ -81,7 +91,7 @@ namespace WebRecomendationControlApp.Controllers
                 tag.ReviewId = reviewId;
                 var existingTag = existingTags
                     .FirstOrDefault(t => t.Tag == tag.Tag && t.ReviewId == reviewId);
-                if (existingTag == null )
+                if (existingTag == null)
                 {
                     existingTags.Add(tag);
                 }
@@ -250,7 +260,21 @@ namespace WebRecomendationControlApp.Controllers
             ViewBag.Liked = IsLiked(user, review.Id);
             ViewBag.StarCount = GetStarCount(user, review.Id);
             ViewBag.Images = GetImages(review.ImageUrl);
+            ViewBag.Rating = GetRating(review.Id);
             return View(review);
+        }
+
+        private int GetRating(int reviewId)
+        {
+            var rates = _context.ReviewRates.Where(r => r.RatedReviewId == reviewId).ToList();
+            if (rates.Count == 0)
+                return 0;
+            int rating = 0;
+            foreach (var rate in rates)
+            {
+                rating += rate.Rate;
+            }
+            return (int)rating / rates.Count();
         }
 
         private FileInfo[] GetImages(string imageUrl)
@@ -307,6 +331,35 @@ namespace WebRecomendationControlApp.Controllers
                 .Include(x => x.Tags)
                 .Include(x => x.Creator);
             return View(reviews);
+        }
+
+        public IActionResult ReviewsSearch(string search)
+        {
+            var ids = getResultIds(search);
+            var empty = false;
+            if (ids.Count == 0)
+            {
+                empty = true;
+            }
+            return RedirectToAction("List", new { ids, empty });
+        }
+
+        private List<int> getResultIds(string search)
+        {
+            var reviewIds1 = _context.Reviews
+                .Where(r => EF.Functions.FreeText(r.Description, search))
+                .Union(_context.Reviews
+                .Where(r => EF.Functions.FreeText(r.Title, search)))
+                .Select(r => r.Id);
+            var reviewIds2 = _context.Reviews.Join(_context.ReviewComments
+                .Where(c => EF.Functions.FreeText(c.Text, search)),
+                r => r.Id,
+                c => c.CommentedReview.Id,
+                (r, c) => new
+                {
+                    r.Id
+                }).Select(r => r.Id);
+            return reviewIds1.Concat(reviewIds2).ToHashSet().ToList();
         }
     }
 }
