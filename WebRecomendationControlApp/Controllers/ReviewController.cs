@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using Markdig;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -209,6 +210,7 @@ namespace WebRecomendationControlApp.Controllers
         {
             var review = GetReview(id);
             ViewBag.Images = GetImages(review.ImageUrl);
+            ViewBag.Description = getMarkdownDescription(review.Description);
             return View(review);
         }
 
@@ -267,7 +269,15 @@ namespace WebRecomendationControlApp.Controllers
             ViewBag.StarCount = GetStarCount(user, review.Id);
             ViewBag.Images = GetImages(review.ImageUrl);
             ViewBag.Rating = GetRating(review.Id);
+            ViewBag.Description = getMarkdownDescription(review.Description);
             return View(review);
+        }
+
+        private string getMarkdownDescription(string description)
+		{
+            // Uses all extensions except the BootStrap, Emoji, SmartyPants and soft line as hard line breaks extensions.
+            var pipeline = new MarkdownPipelineBuilder().UseAdvancedExtensions().Build();
+            return Markdown.ToHtml(description, pipeline);
         }
 
         private int GetRating(int reviewId)

@@ -16,6 +16,7 @@
     <PackageReference Include="AspNet.Security.OAuth.MailRu" Version="6.0.4" />
     <PackageReference Include="AspNet.Security.OAuth.Vkontakte" Version="6.0.4" />
     <PackageReference Include="jQuery.filedrop" Version="1.0.1" />
+    <PackageReference Include="Markdig" Version="0.28.1" />
     <PackageReference Include="Microsoft.AspNet.WebHelpers" Version="3.2.7" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.OAuth" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore" Version="6.0.2" />
