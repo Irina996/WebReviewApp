@@ -6,9 +6,8 @@ namespace WebRecomendationControlApp.ViewModels
 {
     public class ReviewListViewModel
     { 
-        public IEnumerable<Review> Reviews { get; set; }   
-        public SelectList Groups { get; set; }
-        public string Name { get; set; }
-
+        public IEnumerable<Review> Reviews { get; set; }
+        public FilterViewModel FilterViewModel { get; set; }
+        public PageViewModel PageViewModel { get; set; }
     }
 }

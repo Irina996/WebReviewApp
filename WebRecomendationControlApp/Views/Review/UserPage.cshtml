@@ -1,5 +1,6 @@
 ﻿@using WebRecomendationControlApp.ViewModels
 @model ReviewListViewModel
+@addTagHelper *, WebRecomendationControlApp
 
 @{
 	ViewData["Title"] = @Localizer["UserPage"];
@@ -10,9 +11,9 @@
 <form method="get">
 	<div class="form-inline form-group">
 		<label class="control-label">@Localizer["Title"]</label>
-		<input name="name" />
+		<input name="name" value="@Model.FilterViewModel.SelectedName" />
 		<label class="control-label">@Localizer["Group"]</label>
-		<select name="group" asp-items="Model.Groups"></select>
+		<select name="group" asp-items="Model.FilterViewModel.ReviewGroups"></select>
 		<input type="submit" value="@Localizer["Filter"]" class="btn btn-primary" />
 	</div>
 </form>
@@ -40,7 +41,7 @@
 					@Html.DisplayFor(modelItem => item.Group.Name)
 				</td>
 				<td>
-					<a asp-controller="Review" asp-action="Create" asp-route-userId="@ViewBag.userId">
+					<a asp-controller="Review" asp-action="Create" asp-route-userId="@ViewBag.userId" class="text-decoration-none">
 						<i class="fa fa-plus" aria-hidden="true"></i>
 					</a> |
 					<a asp-action="Edit" asp-route-id="@item.Id" class="text-decoration-none">
@@ -57,3 +58,8 @@
 		}
 	</tbody>
 </table>
+
+<page-link page-model="Model.PageViewModel" page-action="UserPage"
+		   page-url-userId="@ViewBag.userId"
+		   page-url-name="@(Model.FilterViewModel.SelectedName)"
+		   page-url-group="@(Model.FilterViewModel.SelectedGroup)"></page-link>

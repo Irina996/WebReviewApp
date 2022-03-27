@@ -355,24 +355,30 @@ namespace WebRecomendationControlApp.Controllers
             return reviews;
         }
 
-        public async Task<IActionResult> UserPage(string userId, int? group, string name)
+        private async Task<string> GetUserId(string userId)
         {
             if (userId == null)
             {
                 var user = await _userManager.GetUserAsync(HttpContext.User);
-                userId = user.Id;
+                return user.Id;
             }
-            ViewBag.userId = userId;
-            var reviews = GetUserReviews(userId, group, name);
+            return userId;
+        }
+        public async Task<IActionResult> UserPage(string userId, int? group, string name, int page = 1)
+        {
+            ViewBag.userId = await GetUserId(userId);
+            IEnumerable<Review> reviews = GetUserReviews(ViewBag.userId, group, name);
 
-            List<ReviewGroup> reviewGroups = _context.reviewGroups.ToList();
-            reviewGroups.Insert(0, new ReviewGroup { Name = "Все", Id = 0 });
+            int pageSize = 2;
+            var count = reviews.Count();
+            var items = reviews.Skip((page - 1) * pageSize).Take(pageSize);
+            PageViewModel pageViewModel = new PageViewModel(count, page, pageSize);
 
             ReviewListViewModel viewModel = new ReviewListViewModel
             {
-                Reviews = reviews.ToList(),
-                Groups = new SelectList(reviewGroups, "Id", "Name"),
-                Name = name
+                Reviews = items,
+                FilterViewModel = new FilterViewModel(_context.reviewGroups.ToList(), group, name),
+                PageViewModel = pageViewModel,
             };
 
             return View(viewModel);
