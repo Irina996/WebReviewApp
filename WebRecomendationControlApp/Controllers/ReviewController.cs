@@ -329,15 +329,23 @@ namespace WebRecomendationControlApp.Controllers
             return (int)starCount;
         }
 
-        private IEnumerable<Review> GetUserReviews(string creatorId)
+        private IEnumerable<Review> GetUserReviews(string creatorId, int? group, string name)
         {
-            var reviews = _context.Reviews.Where(x => x.Creator.Id == creatorId)
+            IQueryable<Review> reviews = _context.Reviews.Where(x => x.Creator.Id == creatorId)
                 .Include(x => x.Group)
                 .OrderByDescending(x => x.Id);
+            if (group != null && group != 0)
+            {
+                reviews = reviews.Where(r => r.GroupId == group);
+            }
+            if (!String.IsNullOrEmpty(name))
+            {
+                reviews = reviews.Where(p => p.Title.Contains(name));
+            }
             return reviews;
         }
 
-        public async Task<IActionResult> UserPage(string userId)
+        public async Task<IActionResult> UserPage(string userId, int? group, string name)
         {
             if (userId == null)
             {
@@ -345,8 +353,19 @@ namespace WebRecomendationControlApp.Controllers
                 userId = user.Id;
             }
             ViewBag.userId = userId;
-            var reviews = GetUserReviews(userId);
-            return View(reviews);
+            var reviews = GetUserReviews(userId, group, name);
+
+            List<ReviewGroup> reviewGroups = _context.reviewGroups.ToList();
+            reviewGroups.Insert(0, new ReviewGroup { Name = "Все", Id = 0 });
+
+            ReviewListViewModel viewModel = new ReviewListViewModel
+            {
+                Reviews = reviews.ToList(),
+                Groups = new SelectList(reviewGroups, "Id", "Name"),
+                Name = name
+            };
+
+            return View(viewModel);
         }
 
         public IActionResult ReviewsSearch(string search)
